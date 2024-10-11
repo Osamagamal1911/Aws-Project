@@ -72,11 +72,46 @@ else
   echo "Change set not executed."
 fi
 
-# Delete lab-application stack
-echo "Deleting lab-application stack..."
-aws cloudformation delete-stack --stack-name lab-application
+# List resources that will be deleted from lab-application stack
+echo "Listing resources that will be deleted with the lab-application stack..."
+aws cloudformation list-stack-resources \
+  --stack-name lab-application \
+  --query 'StackResourceSummaries[*].{ResourceType:ResourceType,LogicalResourceId:LogicalResourceId,PhysicalResourceId:PhysicalResourceId}' \
+  --output table
 
-# Wait for lab-application stack deletion to complete
-echo "Waiting for lab-application stack deletion to complete..."
-aws cloudformation wait stack-delete-complete --stack-name lab-application
-echo "lab-application stack deleted successfully."
+# Confirm if the user wants to delete the lab-application stack
+read -p "Do you want to delete the lab-application stack? (yes/no): " delete_choice
+if [ "$delete_choice" == "yes" ]; then
+  # Delete lab-application stack
+  echo "Deleting lab-application stack..."
+  aws cloudformation delete-stack --stack-name lab-application
+
+  # Wait for lab-application stack deletion to complete
+  echo "Waiting for lab-application stack deletion to complete..."
+  aws cloudformation wait stack-delete-complete --stack-name lab-application
+  echo "lab-application stack deleted successfully."
+else
+  echo "Stack deletion cancelled."
+fi
+
+# List resources that will be deleted from lab-network stack
+echo "Listing resources that will be deleted with the lab-network stack..."
+aws cloudformation list-stack-resources \
+  --stack-name lab-network \
+  --query 'StackResourceSummaries[*].{ResourceType:ResourceType,LogicalResourceId:LogicalResourceId,PhysicalResourceId:PhysicalResourceId}' \
+  --output table
+
+# Confirm if the user wants to delete the lab-network stack
+read -p "Do you want to delete the lab-network stack? (yes/no): " network_delete_choice
+if [ "$network_delete_choice" == "yes" ]; then
+  # Delete lab-network stack
+  echo "Deleting lab-network stack..."
+  aws cloudformation delete-stack --stack-name lab-network
+
+  # Wait for lab-network stack deletion to complete
+  echo "Waiting for lab-network stack deletion to complete..."
+  aws cloudformation wait stack-delete-complete --stack-name lab-network
+  echo "lab-network stack deleted successfully."
+else
+  echo "Network stack deletion cancelled."
+fi
